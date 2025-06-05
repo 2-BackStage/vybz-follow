@@ -40,7 +40,7 @@ public class FollowController {
      */
     @Operation(summary = "사용자 팔로우 여부 확인 API", description = "사용자 팔로우 여부 확인 API 입니다.", tags = {"Follow-Service"})
     @GetMapping("/check")
-    public BaseResponseEntity<Boolean> checkUserFollow(@RequestParam String userUuid, String buskerUuid) {
+    public BaseResponseEntity<Boolean> checkUserFollow(@RequestParam String userUuid, @RequestParam String buskerUuid) {
         boolean isFollowing = followService.checkFollow(userUuid, buskerUuid);
         return new BaseResponseEntity<>(isFollowing);
     }

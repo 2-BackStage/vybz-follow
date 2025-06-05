@@ -4,6 +4,7 @@ import com.vybz.follow_service.follow.domain.Follow;
 import com.vybz.follow_service.follow.domain.Follower;
 import com.vybz.follow_service.follow.domain.Following;
 import com.vybz.follow_service.follow.vo.request.RequestAddFollowVo;
+import com.vybz.follow_service.kafka.event.FollowEvent;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,6 +35,13 @@ public class RequestAddFollowDto {
         return RequestAddFollowDto.builder()
                 .follower(requestAddFollowVo.getFollower())
                 .following(requestAddFollowVo.getFollowing())
+                .build();
+    }
+
+    public static FollowEvent toFollowEvent(String userUuid, String buskerUuid) {
+        return FollowEvent.builder()
+                .userUuid(userUuid)
+                .buskerUuid(buskerUuid)
                 .build();
     }
 

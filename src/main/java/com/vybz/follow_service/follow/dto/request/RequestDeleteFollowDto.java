@@ -1,6 +1,7 @@
 package com.vybz.follow_service.follow.dto.request;
 
 import com.vybz.follow_service.follow.vo.request.RequestDeleteFollowVo;
+import com.vybz.follow_service.kafka.event.UnfollowEvent;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,13 @@ public class RequestDeleteFollowDto {
         return RequestDeleteFollowDto.builder()
                 .userUuid(requestDeleteFollowVo.getUserUuid())
                 .buskerUuid(requestDeleteFollowVo.getBuskerUuid())
+                .build();
+    }
+
+    public static UnfollowEvent toUnfollowEvent(String userUuid, String buskerUuid) {
+        return UnfollowEvent.builder()
+                .userUuid(userUuid)
+                .buskerUuid(buskerUuid)
                 .build();
     }
 
