@@ -1,8 +1,10 @@
 package com.vybz.follow_service.follow.application;
 
+import com.vybz.follow_service.common.util.CursorPageUtil;
 import com.vybz.follow_service.follow.dto.request.RequestAddFollowDto;
 import com.vybz.follow_service.follow.dto.request.RequestDeleteFollowDto;
-import com.vybz.follow_service.follow.dto.response.ResponseFollowDto;
+import com.vybz.follow_service.follow.dto.response.ResponseBuskerFollowerDto;
+import com.vybz.follow_service.follow.dto.response.ResponseUserFollowingDto;
 
 import java.util.List;
 
@@ -22,16 +24,22 @@ public interface FollowService {
     boolean checkFollow(String userUuid, String buskerUuid);
 
     /**
-     * 사용자 팔로우 리스트 조회
+     * 사용자 uuid로 팔로잉 목록 조회
      * @param userUuid
+     * @param lastId
+     * @param pageSize
+     * @param page
      */
-    List<ResponseFollowDto> getFollowingByUserUuid(String userUuid);
+    CursorPageUtil<ResponseUserFollowingDto, String> getFollowingByUserUuid(String userUuid, String lastId, Integer pageSize, Integer page);
 
     /**
-     * 버스커 팔로워 리스트 조회
+     * 버스커 uuid로 팔로워 목록 조회
      * @param buskerUuid
+     * @param lastId
+     * @param pageSize
+     * @param page
      */
-    List<ResponseFollowDto> getFollowerByBuskerUuid(String buskerUuid);
+    CursorPageUtil<ResponseBuskerFollowerDto, String> getFollowerByBuskerUuid(String buskerUuid, String lastId, Integer pageSize, Integer page);
 
     /**
      * 팔로우 삭제

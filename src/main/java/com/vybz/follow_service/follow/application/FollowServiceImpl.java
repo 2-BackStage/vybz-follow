@@ -1,18 +1,18 @@
 package com.vybz.follow_service.follow.application;
 
 import com.vybz.follow_service.common.entity.BaseResponseStatus;
+import com.vybz.follow_service.common.util.CursorPageUtil;
 import com.vybz.follow_service.exception.BaseException;
 import com.vybz.follow_service.follow.domain.Follow;
 import com.vybz.follow_service.follow.dto.request.RequestAddFollowDto;
 import com.vybz.follow_service.follow.dto.request.RequestDeleteFollowDto;
-import com.vybz.follow_service.follow.dto.response.ResponseFollowDto;
+import com.vybz.follow_service.follow.dto.response.ResponseBuskerFollowerDto;
+import com.vybz.follow_service.follow.dto.response.ResponseUserFollowingDto;
 import com.vybz.follow_service.follow.infrastructure.FollowRepository;
-import com.vybz.follow_service.kafka.event.FollowEvent;
 import com.vybz.follow_service.kafka.producer.FollowKafkaProducer;
 import com.vybz.follow_service.kafka.producer.UnfollowKafkaProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -58,29 +58,69 @@ public class FollowServiceImpl implements FollowService {
     }
 
     /**
-     * 유저 팔로잉 리스트 조회
-     *
+     * 사용자 uuid로 팔로잉 목록 조회
      * @param userUuid
+     * @param lastId
+     * @param pageSize
+     * @param page
      */
     @Override
-    public List<ResponseFollowDto> getFollowingByUserUuid(String userUuid) {
-        return followRepository.findAllByUserUuid(userUuid)
-                .stream()
-                .map(ResponseFollowDto::from)
-                .toList();
+    public CursorPageUtil<ResponseUserFollowingDto, String> getFollowingByUserUuid(String userUuid, String lastId, Integer pageSize, Integer page) {
+        List<Follow> follows = followRepository.findFollowingByCursor(userUuid, lastId, pageSize + 1, page);
+        boolean hasNext = follows.size() > pageSize;
+        if (hasNext) {
+            follows = follows.subList(0, pageSize);
+        }
+
+        List<ResponseUserFollowingDto> dto = follows.stream()
+                .flatMap(follow -> follow.getFollowing().stream()
+                        .map(following -> ResponseUserFollowingDto.from(
+                                follow.getFollower().get(0).getUserUuid(), following
+                        ))
+                ).toList();
+
+        String nextCursor = hasNext ? follows.get(follows.size() - 1).getId() : null;
+
+        return CursorPageUtil.<ResponseUserFollowingDto, String>builder()
+                .content(dto)
+                .nextCursor(nextCursor)
+                .hasNext(hasNext)
+                .pageSize(pageSize)
+                .page(page)
+                .build();
     }
 
     /**
-     * 버스커 팔로워 리스트 조회
-     *
+     * 버스커 uuid로 팔로워 목록 조회
      * @param buskerUuid
+     * @param lastId
+     * @param pageSize
+     * @param page
      */
     @Override
-    public List<ResponseFollowDto> getFollowerByBuskerUuid(String buskerUuid) {
-        return followRepository.findAllByBuskerUuid(buskerUuid)
-                .stream()
-                .map(ResponseFollowDto::from)
-                .toList();
+    public CursorPageUtil<ResponseBuskerFollowerDto, String> getFollowerByBuskerUuid(String buskerUuid, String lastId, Integer pageSize, Integer page) {
+        List<Follow> follows = followRepository.findFollowerByCursor(buskerUuid, lastId, pageSize + 1, page);
+        boolean hasNext = follows.size() > pageSize;
+        if (hasNext) {
+            follows = follows.subList(0, pageSize);
+        }
+
+        List<ResponseBuskerFollowerDto> dto = follows.stream()
+                .flatMap(follow -> follow.getFollower().stream()
+                        .map(follower -> ResponseBuskerFollowerDto.from(
+                                follow.getFollowing().get(0).getBuskerUuid(), follower
+                        ))
+                ).toList();
+
+        String nextCursor = hasNext ? follows.get(follows.size() - 1).getId() : null;
+
+        return CursorPageUtil.<ResponseBuskerFollowerDto, String>builder()
+                .content(dto)
+                .nextCursor(nextCursor)
+                .hasNext(hasNext)
+                .pageSize(pageSize)
+                .page(page)
+                .build();
     }
 
     /**
