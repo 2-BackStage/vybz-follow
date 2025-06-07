@@ -10,12 +10,16 @@ import java.util.List;
 public class ResponseUserFollowingVo {
 
     private String userUuid;
-    private List<Following> following;
+    private String buskerUuid;
+    private String nickname;
+    private String profileImageUrl;
 
     @Builder
-    public ResponseUserFollowingVo(String userUuid, List<Following> following) {
+    public ResponseUserFollowingVo(String userUuid, String buskerUuid, String nickname, String profileImageUrl) {
         this.userUuid = userUuid;
-        this.following = following;
+        this.buskerUuid = buskerUuid;
+        this.nickname = nickname;
+        this.profileImageUrl = profileImageUrl;
     }
 
 }

@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.repository.Query;
 import java.util.List;
 import java.util.Optional;
 
-public interface FollowRepository extends MongoRepository<Follow, String> {
+public interface FollowRepository extends MongoRepository<Follow, String>, FollowRepositoryCustom {
 
     /**
      * 사용자 uuid로 팔로잉 정보 조회

@@ -1,21 +1,22 @@
 package com.vybz.follow_service.follow.vo.response;
 
-import com.vybz.follow_service.follow.domain.Follower;
 import lombok.Builder;
 import lombok.Getter;
-
-import java.util.List;
 
 @Getter
 public class ResponseBuskerFollowerVo {
 
     private String buskerUuid;
-    private List<Follower> follower;
+    private String userUuid;
+    private String nickname;
+    private String profileImageUrl;
 
     @Builder
-    public ResponseBuskerFollowerVo(String buskerUuid, List<Follower> follower) {
+    public ResponseBuskerFollowerVo(String buskerUuid, String userUuid, String nickname, String profileImageUrl) {
         this.buskerUuid = buskerUuid;
-        this.follower = follower;
+        this.userUuid = userUuid;
+        this.nickname = nickname;
+        this.profileImageUrl = profileImageUrl;
     }
 
 }

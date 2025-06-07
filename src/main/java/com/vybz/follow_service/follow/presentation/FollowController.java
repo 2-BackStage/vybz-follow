@@ -2,10 +2,12 @@ package com.vybz.follow_service.follow.presentation;
 
 import com.vybz.follow_service.common.entity.BaseResponseEntity;
 import com.vybz.follow_service.common.entity.BaseResponseStatus;
+import com.vybz.follow_service.common.util.CursorPageUtil;
 import com.vybz.follow_service.follow.application.FollowService;
 import com.vybz.follow_service.follow.dto.request.RequestAddFollowDto;
 import com.vybz.follow_service.follow.dto.request.RequestDeleteFollowDto;
-import com.vybz.follow_service.follow.dto.response.ResponseFollowDto;
+import com.vybz.follow_service.follow.dto.response.ResponseBuskerFollowerDto;
+import com.vybz.follow_service.follow.dto.response.ResponseUserFollowingDto;
 import com.vybz.follow_service.follow.vo.request.RequestAddFollowVo;
 import com.vybz.follow_service.follow.vo.request.RequestDeleteFollowVo;
 import com.vybz.follow_service.follow.vo.response.ResponseBuskerFollowerVo;
@@ -13,8 +15,6 @@ import com.vybz.follow_service.follow.vo.response.ResponseUserFollowingVo;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -46,31 +46,43 @@ public class FollowController {
     }
 
     /**
-     * 사용자 팔로잉 리스트 조회
+     * 사용자 UUID로 팔로잉 조회
      * @param userUuid
+     * @param lastId
+     * @param pageSize
+     * @param page
      */
     @Operation(summary = "사용자 UUID로 팔로잉 조회 API", description = "사용자 UUID로 팔로잉 조회 API 입니다.", tags = {"Follow-Service"})
-    @GetMapping("/following-list/{userUuid}")
-    public BaseResponseEntity<List<ResponseUserFollowingVo>> getUserFollowing(@PathVariable("userUuid") String userUuid) {
-        List<ResponseUserFollowingVo> responseUserFollowingVo = followService.getFollowingByUserUuid(userUuid)
-                .stream()
-                .map(ResponseFollowDto::toUserVo)
-                .toList();
-        return new BaseResponseEntity<>(responseUserFollowingVo);
+    @GetMapping("/following-list")
+    public BaseResponseEntity<CursorPageUtil<ResponseUserFollowingVo, String>> getFollowings(
+            @RequestParam String userUuid,
+            @RequestParam(required = false) String lastId,
+            @RequestParam(defaultValue = "20") Integer pageSize,
+            @RequestParam(defaultValue = "1") Integer page) {
+
+        CursorPageUtil<ResponseUserFollowingDto, String> result = followService.getFollowingByUserUuid(userUuid, lastId, pageSize, page);
+
+        return new BaseResponseEntity<>(result.map(ResponseUserFollowingDto::toVo));
     }
 
     /**
-     * 버스커 팔로워 리스트 조회
+     * 버스커 UUID로 팔로워 조회
      * @param buskerUuid
+     * @param lastId
+     * @param pageSize
+     * @param page
      */
     @Operation(summary = "버스커 UUID로 팔로워 조회 API", description = "버스커 UUID로 팔로워 조회 API 입니다.", tags = {"Follow-Service"})
-    @GetMapping("follower-list/{buskerUuid}")
-    public BaseResponseEntity<List<ResponseBuskerFollowerVo>> getBuskerFollower(@PathVariable("buskerUuid") String buskerUuid) {
-        List<ResponseBuskerFollowerVo> responseBuskerFollowerVo = followService.getFollowerByBuskerUuid(buskerUuid)
-                .stream()
-                .map(ResponseFollowDto::toBuskerVo)
-                .toList();
-        return new BaseResponseEntity<>(responseBuskerFollowerVo);
+    @GetMapping("follower-list")
+    public BaseResponseEntity<CursorPageUtil<ResponseBuskerFollowerVo, String>> getFollower(
+            @RequestParam String buskerUuid,
+            @RequestParam(required = false) String lastId,
+            @RequestParam(defaultValue = "20") Integer pageSize,
+            @RequestParam(defaultValue = "1") Integer page) {
+
+        CursorPageUtil<ResponseBuskerFollowerDto, String> result = followService.getFollowerByBuskerUuid(buskerUuid, lastId, pageSize, page);
+
+        return new BaseResponseEntity<>(result.map(ResponseBuskerFollowerDto::toVo));
     }
 
     /**
