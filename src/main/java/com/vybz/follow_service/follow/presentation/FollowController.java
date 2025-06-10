@@ -6,10 +6,14 @@ import com.vybz.follow_service.common.util.CursorPageUtil;
 import com.vybz.follow_service.follow.application.FollowService;
 import com.vybz.follow_service.follow.dto.request.RequestAddFollowDto;
 import com.vybz.follow_service.follow.dto.request.RequestDeleteFollowDto;
+import com.vybz.follow_service.follow.dto.request.RequestUpdateFollowerDto;
+import com.vybz.follow_service.follow.dto.request.RequestUpdateFollowingDto;
 import com.vybz.follow_service.follow.dto.response.ResponseBuskerFollowerDto;
 import com.vybz.follow_service.follow.dto.response.ResponseUserFollowingDto;
 import com.vybz.follow_service.follow.vo.request.RequestAddFollowVo;
 import com.vybz.follow_service.follow.vo.request.RequestDeleteFollowVo;
+import com.vybz.follow_service.follow.vo.request.RequestUpdateFollowerVo;
+import com.vybz.follow_service.follow.vo.request.RequestUpdateFollowingVo;
 import com.vybz.follow_service.follow.vo.response.ResponseBuskerFollowerVo;
 import com.vybz.follow_service.follow.vo.response.ResponseUserFollowingVo;
 import io.swagger.v3.oas.annotations.Operation;
@@ -83,6 +87,28 @@ public class FollowController {
         CursorPageUtil<ResponseBuskerFollowerDto, String> result = followService.getFollowerByBuskerUuid(buskerUuid, lastId, pageSize, page);
 
         return new BaseResponseEntity<>(result.map(ResponseBuskerFollowerDto::toVo));
+    }
+
+    /**
+     * 팔로워 정보 수정
+     * @param requestUpdateFollowerVo
+     */
+    @Operation(summary = "팔로워 정보 수정 API", description = "사용자 UUID로 팔로우 리스트 정보 수정 API 입니다.", tags = {"Follow-Service"})
+    @PutMapping("/follower")
+    public BaseResponseEntity<Void> updateFollower(@RequestBody RequestUpdateFollowerVo requestUpdateFollowerVo) {
+        followService.updateFollower(RequestUpdateFollowerDto.from(requestUpdateFollowerVo));
+        return new BaseResponseEntity<>(BaseResponseStatus.SUCCESS);
+    }
+
+    /**
+     * 팔로잉 정보 수정
+     * @param requestUpdateFollowingVo
+     */
+    @Operation(summary = "팔로잉 정보 수정 API", description = "버스커 UUID로 팔로우 리스트 정보 수정 API 입니다.", tags = {"Follow-Service"})
+    @PutMapping("/following")
+    public BaseResponseEntity<Void> updateFollowing(@RequestBody RequestUpdateFollowingVo requestUpdateFollowingVo) {
+        followService.updateFollowing(RequestUpdateFollowingDto.from(requestUpdateFollowingVo));
+        return new BaseResponseEntity<>(BaseResponseStatus.SUCCESS);
     }
 
     /**

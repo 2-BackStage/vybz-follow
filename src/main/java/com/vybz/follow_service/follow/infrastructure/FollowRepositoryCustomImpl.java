@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 
 import java.util.List;
 
@@ -36,6 +37,13 @@ public class FollowRepositoryCustomImpl implements FollowRepositoryCustom {
         return mongoTemplate.find(finalQuery, Follow.class);
     }
 
+    /**
+     * 버스커 UUID를 기준으로 커서 기반 팔로워 목록 조회
+     * @param buskerUuid
+     * @param lastId
+     * @param pageSize
+     * @param page
+     */
     @Override
     public List<Follow> findFollowerByCursor(String buskerUuid, String lastId, Integer pageSize, Integer page) {
         Query baseQuery = new Query();
@@ -46,5 +54,37 @@ public class FollowRepositoryCustomImpl implements FollowRepositoryCustom {
         log.info("Follower 페이징 조회 - buskerUuid={}, page={}, pageSize={}, lastId={}", buskerUuid, page, pageSize, lastId);
 
         return mongoTemplate.find(finalQuery, Follow.class);
+    }
+
+    /**
+     * 팔로워 정보 업데이트
+     * @param userUuid
+     * @param profileImageUrl
+     * @param nickname
+     */
+    @Override
+    public void updateFollower(String userUuid, String profileImageUrl, String nickname) {
+        Query query = Query.query(Criteria.where("follower.userUuid").is(userUuid));
+        Update update = new Update()
+                .set("follower.$[elem].nickname", nickname)
+                .set("follower.$[elem].profileImageUrl", profileImageUrl)
+                .filterArray(Criteria.where("elem.userUuid").is(userUuid));
+        mongoTemplate.updateMulti(query, update, Follow.class);
+    }
+
+    /**
+     * 팔로잉 정보 업데이트
+     * @param buskerUuid
+     * @param profileImageUrl
+     * @param nickname
+     */
+    @Override
+    public void updateFollowing(String buskerUuid, String profileImageUrl, String nickname) {
+        Query query = Query.query(Criteria.where("following.buskerUuid").is(buskerUuid));
+        Update update = new Update()
+                .set("following.$[elem].nickname", nickname)
+                .set("following.$[elem].profileImageUrl", profileImageUrl)
+                .filterArray(Criteria.where("elem.buskerUuid").is(buskerUuid));
+        mongoTemplate.updateMulti(query, update, Follow.class);
     }
 }
