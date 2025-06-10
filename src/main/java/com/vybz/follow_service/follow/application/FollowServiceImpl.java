@@ -6,6 +6,8 @@ import com.vybz.follow_service.exception.BaseException;
 import com.vybz.follow_service.follow.domain.Follow;
 import com.vybz.follow_service.follow.dto.request.RequestAddFollowDto;
 import com.vybz.follow_service.follow.dto.request.RequestDeleteFollowDto;
+import com.vybz.follow_service.follow.dto.request.RequestUpdateFollowerDto;
+import com.vybz.follow_service.follow.dto.request.RequestUpdateFollowingDto;
 import com.vybz.follow_service.follow.dto.response.ResponseBuskerFollowerDto;
 import com.vybz.follow_service.follow.dto.response.ResponseUserFollowingDto;
 import com.vybz.follow_service.follow.infrastructure.FollowRepository;
@@ -13,6 +15,10 @@ import com.vybz.follow_service.kafka.producer.FollowKafkaProducer;
 import com.vybz.follow_service.kafka.producer.UnfollowKafkaProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,6 +29,7 @@ import java.util.List;
 public class FollowServiceImpl implements FollowService {
 
     private final FollowRepository followRepository;
+    private final MongoTemplate mongoTemplate;
     private final FollowKafkaProducer followKafkaProducer;
     private final UnfollowKafkaProducer unfollowKafkaProducer;
 
@@ -121,6 +128,24 @@ public class FollowServiceImpl implements FollowService {
                 .pageSize(pageSize)
                 .page(page)
                 .build();
+    }
+
+    /**
+     * 유저 uuid 기준으로 관계되는 팔로워 정보 업데이트
+     * @param requestUpdateFollowerDto
+     */
+    @Override
+    public void updateFollower(RequestUpdateFollowerDto requestUpdateFollowerDto) {
+        followRepository.updateFollower(requestUpdateFollowerDto.getUserUuid(), requestUpdateFollowerDto.getNickname(), requestUpdateFollowerDto.getProfileImageUrl());
+    }
+
+    /**
+     * 버스커 uuid 기준으로 관계되는 팔로잉 정보 업데이트
+     * @param requestUpdateFollowingDto
+     */
+    @Override
+    public void updateFollowing(RequestUpdateFollowingDto requestUpdateFollowingDto) {
+        followRepository.updateFollowing(requestUpdateFollowingDto.getBuskerUuid(), requestUpdateFollowingDto.getNickname(), requestUpdateFollowingDto.getProfileImageUrl());
     }
 
     /**

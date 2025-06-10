@@ -3,10 +3,10 @@ package com.vybz.follow_service.follow.application;
 import com.vybz.follow_service.common.util.CursorPageUtil;
 import com.vybz.follow_service.follow.dto.request.RequestAddFollowDto;
 import com.vybz.follow_service.follow.dto.request.RequestDeleteFollowDto;
+import com.vybz.follow_service.follow.dto.request.RequestUpdateFollowerDto;
+import com.vybz.follow_service.follow.dto.request.RequestUpdateFollowingDto;
 import com.vybz.follow_service.follow.dto.response.ResponseBuskerFollowerDto;
 import com.vybz.follow_service.follow.dto.response.ResponseUserFollowingDto;
-
-import java.util.List;
 
 public interface FollowService {
 
@@ -40,6 +40,19 @@ public interface FollowService {
      * @param page
      */
     CursorPageUtil<ResponseBuskerFollowerDto, String> getFollowerByBuskerUuid(String buskerUuid, String lastId, Integer pageSize, Integer page);
+
+
+    /**
+     * 유저 uuid 기준으로 관계되는 팔로워 정보 업데이트
+     * @param requestUpdateFollowerDto
+     */
+    void updateFollower(RequestUpdateFollowerDto requestUpdateFollowerDto);
+
+    /**
+     * 버스커 uuid 기준으로 관계되는 팔로잉 정보 업데이트
+     * @param requestUpdateFollowingDto
+     */
+    void updateFollowing(RequestUpdateFollowingDto requestUpdateFollowingDto);
 
     /**
      * 팔로우 삭제

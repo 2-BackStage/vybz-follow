@@ -12,11 +12,11 @@ import org.springframework.kafka.core.ProducerFactory;
 @RequiredArgsConstructor
 public class FollowKafkaConfig {
 
-    private final CommonKafkaProducerConfig commonKafkaProducerConfig;
+    private final CommonKafkaConfig commonKafkaConfig;
 
     @Bean
     public ProducerFactory<String, FollowEvent> createFollowProducerFactory() {
-        return new DefaultKafkaProducerFactory<>(commonKafkaProducerConfig.producerConfigs());
+        return new DefaultKafkaProducerFactory<>(commonKafkaConfig.producerConfigs());
     }
 
     @Bean

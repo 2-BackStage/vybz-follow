@@ -12,11 +12,11 @@ import org.springframework.kafka.core.ProducerFactory;
 @RequiredArgsConstructor
 public class UnfollowKafkaConfig {
 
-    private final CommonKafkaProducerConfig commonKafkaProducerConfig;
+    private final CommonKafkaConfig commonKafkaConfig;
 
     @Bean
     public ProducerFactory<String, UnfollowEvent> unfollowProducerFactory() {
-        return new DefaultKafkaProducerFactory<>(commonKafkaProducerConfig.producerConfigs());
+        return new DefaultKafkaProducerFactory<>(commonKafkaConfig.producerConfigs());
     }
 
     @Bean
