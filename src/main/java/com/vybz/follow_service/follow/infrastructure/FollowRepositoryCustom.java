@@ -41,4 +41,16 @@ public interface FollowRepositoryCustom {
      */
     void updateFollowing(String buskerUuid, String profileImageUrl, String nickname);
 
+    /**
+     * 팔로워 삭제
+     * @param userUuid
+     */
+    void deleteFollowerRelationsByUserUuid(String userUuid);
+
+    /**
+     * 팔로잉 삭제
+     * @param buskerUuid
+     */
+    void deleteFollowingRelationsByBuskerUuid(String buskerUuid);
+
 }

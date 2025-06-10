@@ -90,10 +90,10 @@ public class FollowController {
     }
 
     /**
-     * 팔로워 정보 수정
+     * 유저 uuid 기준으로 관계되는 팔로워 정보 수정
      * @param requestUpdateFollowerVo
      */
-    @Operation(summary = "팔로워 정보 수정 API", description = "사용자 UUID로 팔로우 리스트 정보 수정 API 입니다.", tags = {"Follow-Service"})
+    @Operation(summary = "유저 UUID 기준으로 관계되는 팔로워 정보 수정 API", description = "유저 UUID 기준으로 관계되는 팔로워 정보 수정 API 입니다.", tags = {"Follow-Service"})
     @PutMapping("/follower")
     public BaseResponseEntity<Void> updateFollower(@RequestBody RequestUpdateFollowerVo requestUpdateFollowerVo) {
         followService.updateFollower(RequestUpdateFollowerDto.from(requestUpdateFollowerVo));
@@ -101,10 +101,10 @@ public class FollowController {
     }
 
     /**
-     * 팔로잉 정보 수정
+     * 버스커 uuid 기준으로 관계되는 팔로잉 정보 수정
      * @param requestUpdateFollowingVo
      */
-    @Operation(summary = "팔로잉 정보 수정 API", description = "버스커 UUID로 팔로우 리스트 정보 수정 API 입니다.", tags = {"Follow-Service"})
+    @Operation(summary = "버스커 UUID 기준으로 관계되는 팔로워 정보 수정 API", description = "버스커 UUID 기준으로 관계되는 팔로워 정보 수정 API 입니다.", tags = {"Follow-Service"})
     @PutMapping("/following")
     public BaseResponseEntity<Void> updateFollowing(@RequestBody RequestUpdateFollowingVo requestUpdateFollowingVo) {
         followService.updateFollowing(RequestUpdateFollowingDto.from(requestUpdateFollowingVo));

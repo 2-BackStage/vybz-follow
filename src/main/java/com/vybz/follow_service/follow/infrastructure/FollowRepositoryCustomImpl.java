@@ -57,7 +57,7 @@ public class FollowRepositoryCustomImpl implements FollowRepositoryCustom {
     }
 
     /**
-     * 팔로워 정보 업데이트
+     * 유저 uuid 기준으로 관계되는 팔로워 정보 업데이트
      * @param userUuid
      * @param profileImageUrl
      * @param nickname
@@ -73,7 +73,7 @@ public class FollowRepositoryCustomImpl implements FollowRepositoryCustom {
     }
 
     /**
-     * 팔로잉 정보 업데이트
+     * 버스커 uuid 기준으로 관계되는 팔로잉 정보 업데이트
      * @param buskerUuid
      * @param profileImageUrl
      * @param nickname
@@ -86,5 +86,25 @@ public class FollowRepositoryCustomImpl implements FollowRepositoryCustom {
                 .set("following.$[elem].profileImageUrl", profileImageUrl)
                 .filterArray(Criteria.where("elem.buskerUuid").is(buskerUuid));
         mongoTemplate.updateMulti(query, update, Follow.class);
+    }
+
+    /**
+     * 사용자 UUID를 기준으로 팔로워 관계 삭제
+     * @param userUuid
+     */
+    @Override
+    public void deleteFollowerRelationsByUserUuid(String userUuid) {
+        Query query = Query.query(Criteria.where("follower.userUuid").is(userUuid));
+        mongoTemplate.remove(query, Follow.class);
+    }
+
+    /**
+     * 버스커 UUID를 기준으로 팔로잉 관계 삭제
+     * @param buskerUuid
+     */
+    @Override
+    public void deleteFollowingRelationsByBuskerUuid(String buskerUuid) {
+        Query query = Query.query(Criteria.where("following.buskerUuid").is(buskerUuid));
+        mongoTemplate.remove(query, Follow.class);
     }
 }

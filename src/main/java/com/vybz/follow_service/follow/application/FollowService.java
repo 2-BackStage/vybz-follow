@@ -43,13 +43,13 @@ public interface FollowService {
 
 
     /**
-     * 팔로워 정보 업데이트
+     * 유저 uuid 기준으로 관계되는 팔로워 정보 업데이트
      * @param requestUpdateFollowerDto
      */
     void updateFollower(RequestUpdateFollowerDto requestUpdateFollowerDto);
 
     /**
-     * 팔로잉 정보 업데이트
+     * 버스커 uuid 기준으로 관계되는 팔로잉 정보 업데이트
      * @param requestUpdateFollowingDto
      */
     void updateFollowing(RequestUpdateFollowingDto requestUpdateFollowingDto);

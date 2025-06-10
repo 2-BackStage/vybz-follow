@@ -39,4 +39,18 @@ public interface FollowRepository extends MongoRepository<Follow, String>, Follo
     @Query(value = "{ 'follower.userUuid': ?0, 'following.buskerUuid': ?1 }")
     Optional<Follow> findByUserUuidAndBuskerUuid(String userUuid, String buskerUuid);
 
+    /**
+     * 사용자 uuid로 팔로잉 정보가 존재하는지 확인
+     * @param userUuid
+     */
+    @Query(value = "{ 'follower.userUuid': ?0 }", exists = true)
+    boolean existsByUserUuid(String userUuid);
+
+    /**
+     * 버스커 uuid로 팔로워 정보가 존재하는지 확인
+     * @param buskerUuid
+     */
+    @Query(value = "{ 'following.buskerUuid': ?0 }", exists = true)
+    boolean existsByBuskerUuid(String buskerUuid);
+
 }
