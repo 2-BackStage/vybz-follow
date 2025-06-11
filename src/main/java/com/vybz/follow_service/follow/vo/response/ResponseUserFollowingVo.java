@@ -9,14 +9,12 @@ import java.util.List;
 @Getter
 public class ResponseUserFollowingVo {
 
-    private String userUuid;
     private String buskerUuid;
     private String nickname;
     private String profileImageUrl;
 
     @Builder
-    public ResponseUserFollowingVo(String userUuid, String buskerUuid, String nickname, String profileImageUrl) {
-        this.userUuid = userUuid;
+    public ResponseUserFollowingVo(String buskerUuid, String nickname, String profileImageUrl) {
         this.buskerUuid = buskerUuid;
         this.nickname = nickname;
         this.profileImageUrl = profileImageUrl;

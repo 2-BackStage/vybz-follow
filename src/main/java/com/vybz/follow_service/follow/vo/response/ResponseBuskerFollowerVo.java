@@ -6,14 +6,12 @@ import lombok.Getter;
 @Getter
 public class ResponseBuskerFollowerVo {
 
-    private String buskerUuid;
     private String userUuid;
     private String nickname;
     private String profileImageUrl;
 
     @Builder
-    public ResponseBuskerFollowerVo(String buskerUuid, String userUuid, String nickname, String profileImageUrl) {
-        this.buskerUuid = buskerUuid;
+    public ResponseBuskerFollowerVo(String userUuid, String nickname, String profileImageUrl) {
         this.userUuid = userUuid;
         this.nickname = nickname;
         this.profileImageUrl = profileImageUrl;
