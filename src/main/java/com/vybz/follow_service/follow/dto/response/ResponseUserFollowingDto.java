@@ -34,7 +34,6 @@ public class ResponseUserFollowingDto {
 
     public ResponseUserFollowingVo toVo() {
         return ResponseUserFollowingVo.builder()
-                .userUuid(userUuid)
                 .buskerUuid(buskerUuid)
                 .nickname(nickname)
                 .profileImageUrl(profileImageUrl)
