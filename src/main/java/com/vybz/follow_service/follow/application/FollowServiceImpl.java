@@ -73,6 +73,10 @@ public class FollowServiceImpl implements FollowService {
      */
     @Override
     public CursorPageUtil<ResponseUserFollowingDto, String> getFollowingByUserUuid(String userUuid, String lastId, Integer pageSize, Integer page) {
+        if (!followRepository.existsByUserUuid(userUuid)) {
+            throw new BaseException(BaseResponseStatus.NO_EXIST_USER);
+        }
+
         List<Follow> follows = followRepository.findFollowingByCursor(userUuid, lastId, pageSize + 1, page);
         boolean hasNext = follows.size() > pageSize;
         if (hasNext) {
@@ -106,6 +110,10 @@ public class FollowServiceImpl implements FollowService {
      */
     @Override
     public CursorPageUtil<ResponseBuskerFollowerDto, String> getFollowerByBuskerUuid(String buskerUuid, String lastId, Integer pageSize, Integer page) {
+        if (!followRepository.existsByBuskerUuid(buskerUuid)) {
+            throw new BaseException(BaseResponseStatus.NO_EXIST_BUSKER);
+        }
+
         List<Follow> follows = followRepository.findFollowerByCursor(buskerUuid, lastId, pageSize + 1, page);
         boolean hasNext = follows.size() > pageSize;
         if (hasNext) {
