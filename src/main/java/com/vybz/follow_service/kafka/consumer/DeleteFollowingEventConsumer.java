@@ -14,8 +14,8 @@ public class DeleteFollowingEventConsumer {
     private final FollowRepository followRepository;
 
     @KafkaListener(
-            topics = "delete-user-info",
-            groupId = "follow-group",
+            topics = "delete-busker-info",
+            groupId = "delete-busker-follow-group",
             containerFactory = "stringFollowingKafkaListenerContainerFactory"
     )
     public void consumeDeleteFollowingEvent(String buskerUuid) {

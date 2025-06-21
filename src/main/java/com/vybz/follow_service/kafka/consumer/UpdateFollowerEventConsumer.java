@@ -16,7 +16,7 @@ public class UpdateFollowerEventConsumer {
 
     @KafkaListener(
             topics = "update-user-info",
-            groupId = "follow-group",
+            groupId = "update-user-follow-group",
             containerFactory = "followerKafkaListenerContainerFactory"
     )
     public void consumeUpdateFollowEvent(FollowerEvent event) {

@@ -15,7 +15,7 @@ public class DeleteFollowerEventConsumer {
 
     @KafkaListener(
             topics = "delete-user-info",
-            groupId = "follow-group",
+            groupId = "delete-user-follow-group",
             containerFactory = "stringFollowerKafkaListenerContainerFactory"
     )
     public void consumeDeleteFollowerEvent(String userUuid) {
