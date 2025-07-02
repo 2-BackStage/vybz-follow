@@ -4,6 +4,8 @@ import com.vybz.follow_service.common.entity.BaseResponseStatus;
 import com.vybz.follow_service.common.util.CursorPageUtil;
 import com.vybz.follow_service.exception.BaseException;
 import com.vybz.follow_service.follow.domain.Follow;
+import com.vybz.follow_service.follow.domain.Follower;
+import com.vybz.follow_service.follow.domain.Following;
 import com.vybz.follow_service.follow.dto.request.RequestAddFollowDto;
 import com.vybz.follow_service.follow.dto.request.RequestDeleteFollowDto;
 import com.vybz.follow_service.follow.dto.request.RequestUpdateFollowerDto;
@@ -21,6 +23,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -40,14 +43,16 @@ public class FollowServiceImpl implements FollowService {
      */
     @Override
     public void createFollow(RequestAddFollowDto requestAddFollowDto) {
-        if (followRepository.existsByUserUuidAndBuskerUuid(
-                requestAddFollowDto.getFollower().get(0).getUserUuid(), requestAddFollowDto.getFollowing().get(0).getBuskerUuid())) {
+        String userUuid = requestAddFollowDto.getFollower().get(0).getUserUuid();
+        String buskerUuid = requestAddFollowDto.getFollowing().get(0).getBuskerUuid();
+        
+        if (followRepository.existsByUserUuidAndBuskerUuid(userUuid, buskerUuid)) {
             throw new BaseException(BaseResponseStatus.ALREADY_FOLLOWED);
         }
+        
         followRepository.save(requestAddFollowDto.toDocument());
 
-        followKafkaProducer.sendFollowEvent(RequestAddFollowDto.toFollowEvent(requestAddFollowDto.getFollower().get(0).getUserUuid(),
-                requestAddFollowDto.getFollowing().get(0).getBuskerUuid()));
+        followKafkaProducer.sendFollowEvent(RequestAddFollowDto.toFollowEvent(userUuid, buskerUuid));
 
         log.info("Follow saved: {}", requestAddFollowDto);
     }
@@ -80,12 +85,14 @@ public class FollowServiceImpl implements FollowService {
             follows = follows.subList(0, pageSize);
         }
 
-        List<ResponseUserFollowingDto> dto = follows.stream()
-                .flatMap(follow -> follow.getFollowing().stream()
-                        .map(following -> ResponseUserFollowingDto.from(
-                                follow.getFollower().get(0).getUserUuid(), following
-                        ))
-                ).toList();
+        List<ResponseUserFollowingDto> dto = new ArrayList<>(follows.size() * 2);
+        
+        for (Follow follow : follows) {
+            String currentUserUuid = follow.getFollower().get(0).getUserUuid();
+            for (Following following : follow.getFollowing()) {
+                dto.add(ResponseUserFollowingDto.from(currentUserUuid, following));
+            }
+        }
 
         String nextCursor = hasNext ? follows.get(follows.size() - 1).getId() : null;
 
@@ -114,12 +121,14 @@ public class FollowServiceImpl implements FollowService {
             follows = follows.subList(0, pageSize);
         }
 
-        List<ResponseBuskerFollowerDto> dto = follows.stream()
-                .flatMap(follow -> follow.getFollower().stream()
-                        .map(follower -> ResponseBuskerFollowerDto.from(
-                                follow.getFollowing().get(0).getBuskerUuid(), follower
-                        ))
-                ).toList();
+        List<ResponseBuskerFollowerDto> dto = new ArrayList<>(follows.size() * 2);
+        
+        for (Follow follow : follows) {
+            String currentBuskerUuid = follow.getFollowing().get(0).getBuskerUuid();
+            for (Follower follower : follow.getFollower()) {
+                dto.add(ResponseBuskerFollowerDto.from(currentBuskerUuid, follower));
+            }
+        }
 
         String nextCursor = hasNext ? follows.get(follows.size() - 1).getId() : null;
 
@@ -138,7 +147,11 @@ public class FollowServiceImpl implements FollowService {
      */
     @Override
     public void updateFollower(RequestUpdateFollowerDto requestUpdateFollowerDto) {
-        followRepository.updateFollower(requestUpdateFollowerDto.getUserUuid(), requestUpdateFollowerDto.getNickname(), requestUpdateFollowerDto.getProfileImageUrl());
+        followRepository.updateFollower(
+            requestUpdateFollowerDto.getUserUuid(), 
+            requestUpdateFollowerDto.getNickname(), 
+            requestUpdateFollowerDto.getProfileImageUrl()
+        );
     }
 
     /**
@@ -147,7 +160,11 @@ public class FollowServiceImpl implements FollowService {
      */
     @Override
     public void updateFollowing(RequestUpdateFollowingDto requestUpdateFollowingDto) {
-        followRepository.updateFollowing(requestUpdateFollowingDto.getBuskerUuid(), requestUpdateFollowingDto.getNickname(), requestUpdateFollowingDto.getProfileImageUrl());
+        followRepository.updateFollowing(
+            requestUpdateFollowingDto.getBuskerUuid(), 
+            requestUpdateFollowingDto.getNickname(), 
+            requestUpdateFollowingDto.getProfileImageUrl()
+        );
     }
 
     /**
@@ -157,13 +174,14 @@ public class FollowServiceImpl implements FollowService {
      */
     @Override
     public void deleteFollowing(RequestDeleteFollowDto requestDeleteFollowDto) {
-        Follow follow = followRepository.findByUserUuidAndBuskerUuid(requestDeleteFollowDto.getUserUuid(), requestDeleteFollowDto.getBuskerUuid())
+        String userUuid = requestDeleteFollowDto.getUserUuid();
+        String buskerUuid = requestDeleteFollowDto.getBuskerUuid();
+        
+        Follow follow = followRepository.findByUserUuidAndBuskerUuid(userUuid, buskerUuid)
                 .orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_FOLLOW));
         followRepository.delete(follow);
 
-        unfollowKafkaProducer.sendUnfollowEvent(RequestDeleteFollowDto.toUnfollowEvent(requestDeleteFollowDto.getUserUuid(),
-                requestDeleteFollowDto.getBuskerUuid()));
-        log.info("Unfollow completed and Kafka event sent: {}", requestDeleteFollowDto);
+        unfollowKafkaProducer.sendUnfollowEvent(RequestDeleteFollowDto.toUnfollowEvent(userUuid, buskerUuid));
+        log.info("Unfollow completed and Kafka event sent:: userUuid={}, buskerUuid={}", userUuid, buskerUuid);
     }
-
 }
