@@ -5,6 +5,10 @@ import com.vybz.follow_service.follow.domain.Follow;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.MatchOperation;
+import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -29,6 +33,8 @@ public class FollowRepositoryCustomImpl implements FollowRepositoryCustom {
     public List<Follow> findFollowingByCursor(String userUuid, String lastId, Integer pageSize, Integer page) {
         Query baseQuery = new Query();
         baseQuery.addCriteria(Criteria.where("follower.userUuid").is(userUuid));
+        // 프로젝션: 필요한 필드만 조회하여 네트워크 전송량 감소
+        baseQuery.fields().include("follower").include("following").include("_id");
 
         Query finalQuery = MongoCursorPageHelper.build(baseQuery, lastId, pageSize, page);
 
@@ -48,6 +54,8 @@ public class FollowRepositoryCustomImpl implements FollowRepositoryCustom {
     public List<Follow> findFollowerByCursor(String buskerUuid, String lastId, Integer pageSize, Integer page) {
         Query baseQuery = new Query();
         baseQuery.addCriteria(Criteria.where("following.buskerUuid").is(buskerUuid));
+        // 프로젝션: 필요한 필드만 조회하여 네트워크 전송량 감소
+        baseQuery.fields().include("follower").include("following").include("_id");
 
         Query finalQuery = MongoCursorPageHelper.build(baseQuery, lastId, pageSize, page);
 
@@ -62,6 +70,17 @@ public class FollowRepositoryCustomImpl implements FollowRepositoryCustom {
      * @param profileImageUrl
      * @param nickname
      */
+    public boolean existsByUserUuidAndBuskerUuidOptimized(String userUuid, String buskerUuid) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("follower.userUuid").is(userUuid)
+                .and("following.buskerUuid").is(buskerUuid));
+        // count는 exists보다 빠름 (인덱스만 확인)
+        return mongoTemplate.count(query, Follow.class) > 0;
+    }
+
+    /**
+     * 유저 uuid 기준으로 관계되는 팔로워 정보 업데이트
+     */
     @Override
     public void updateFollower(String userUuid, String profileImageUrl, String nickname) {
         Query query = Query.query(Criteria.where("follower.userUuid").is(userUuid));
@@ -69,6 +88,7 @@ public class FollowRepositoryCustomImpl implements FollowRepositoryCustom {
                 .set("follower.$[elem].nickname", nickname)
                 .set("follower.$[elem].profileImageUrl", profileImageUrl)
                 .filterArray(Criteria.where("elem.userUuid").is(userUuid));
+        
         mongoTemplate.updateMulti(query, update, Follow.class);
     }
 
@@ -85,6 +105,7 @@ public class FollowRepositoryCustomImpl implements FollowRepositoryCustom {
                 .set("following.$[elem].nickname", nickname)
                 .set("following.$[elem].profileImageUrl", profileImageUrl)
                 .filterArray(Criteria.where("elem.buskerUuid").is(buskerUuid));
+        
         mongoTemplate.updateMulti(query, update, Follow.class);
     }
 
